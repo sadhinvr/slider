@@ -193,7 +193,7 @@ class Slider {
                     .findIndex((a) => a == window.innerWidth) - 1;
             if (x != -1) {
                 const bp = z.res[keys[x]];
-                z.o = bp?.o || z.o;
+                z.o = bp?.show || z.o;
                 z.to = bp?.to || z.to;
             } else {
                 z.o = z.res.all.o;
