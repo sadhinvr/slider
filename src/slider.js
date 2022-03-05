@@ -137,10 +137,7 @@ class Slider {
                     if (i <= z.c) {
                         continue;
                     }
-                    if (
-                        z.a[i] == z.a[z.c] &&
-                        z.a[i - z.to] == pospre
-                    ) {
+                    if (z.a[i] == z.a[z.c] && z.a[i - z.to] == pospre) {
                         z.c = i;
                         // console.log(goto);
                         break;
@@ -152,10 +149,7 @@ class Slider {
                         continue;
                     }
                     // console.log('kdjk')
-                    if (
-                        z.a[i] == z.a[z.c] &&
-                        z.a[i + z.o + z.to] == posnxt
-                    ) {
+                    if (z.a[i] == z.a[z.c] && z.a[i + z.o + z.to] == posnxt) {
                         z.c = i;
                         break;
                     }
@@ -229,58 +223,65 @@ class Slider {
         });
 
         const startSwiping = (e) => {
-            if (e.cancelable) e.preventDefault();
+            z.ssb = true;
+            z.sts && clearTimeout(z.sts);
+            e.cancelable && e.preventDefault();
             e.stopPropagation();
             z.hover = true;
-            let react = z.p.getBoundingClientRect(),
-                temX = (e.clientX || e.touches[0].clientX) - react.x,
-                temCurInd = z.c,
-                calPos = (e) => {
-                    z.temXpos =
-                        (-100 / z.o) * temCurInd -
-                        ((temX -
-                            (e.clientX || e.touches[0].clientX) -
-                            react.x) /
-                            react.width) *
-                            100;
-                };
-            // console.log('touchstart');
-            z.touchMove = (e) => {
-                calPos(e);
-                z.c = Math.round(Math.abs(z.temXpos / (100 / z.o)));
-
-                if (
-                    z.temXpos <=
-                        (z.a.length - z.o) * (-100 / z.o) ||
-                    z.temXpos >= 0
-                ) {
-                    // temCurInd=z.c;
-                    // console.log(z.c)
-                    temX = (e.clientX || e.touches[0].clientX) - react.x;
-                    z.playBack(z.temXpos >= 0 ? -1 : 1);
-                    temCurInd = z.c;
+            if(e.clientX || e.touches){
+                let react = z.p.getBoundingClientRect(),
+                    temX = (e.clientX || e.touches[0].clientX) - react.x,
+                    temCurInd = z.c,
+                    calPos = (e) => {
+                        z.txp =
+                            (-100 / z.o) * temCurInd -
+                            ((temX -
+                                (e.clientX || e.touches[0].clientX) -
+                                react.x) /
+                                react.width) *
+                                100;
+                    };
+                // console.log('touchstart');
+    
+                //touch move function
+                z.fmt = (e) => {
                     calPos(e);
-
-                    // z.temXpos = (-100 / z.o) * z.c;
-                    console.log((-100 / z.o) * z.c);
-                }
-
-                // console.log(z.temXpos)
-                z.s.style = `transform: translate3d(${z.temXpos}%, 0px, 0px);transition:0s`;
-            };
-            window.addEventListener("touchmove", z.touchMove);
-            window.addEventListener("mousemove", z.touchMove);
+                    z.c = Math.round(Math.abs(z.txp / (100 / z.o)));
+    
+                    if (z.txp <= (z.a.length - z.o) * (-100 / z.o) || z.txp >= 0) {
+                        // temCurInd=z.c;
+                        // console.log(z.c)
+                        temX = (e.clientX || e.touches[0].clientX) - react.x;
+                        z.playBack(z.txp >= 0 ? -1 : 1);
+                        temCurInd = z.c;
+                        calPos(e);
+    
+                        // z.txp = (-100 / z.o) * z.c;
+                        console.log((-100 / z.o) * z.c);
+                    }
+    
+                    // console.log(z.txp)
+                    z.s.style = `transform: translate3d(${z.txp}%, 0px, 0px);transition:0s`;
+                };
+                window.addEventListener("touchmove", z.fmt);
+                window.addEventListener("mousemove", z.fmt);
+            }
         };
 
         const stopSwiping = (e) => {
-            window.removeEventListener("touchmove", z.touchMove);
-            window.removeEventListener("mousemove", z.touchMove);
-            setTimeout(() => (z.hover = false), z.sp * 2);
-            if (z.temXpos) {
-                z.c = Math.round(Math.abs(z.temXpos / (100 / z.o)));
-                z.s.style = `transform: translate3d(${
-                    (-100 / z.o) * z.c
-                }%, 0px, 0px);transition: all ${z.sp / 1000 / 1.5}s ease 0s`;
+            if (z.ssb) {
+                window.removeEventListener("touchmove", z.fmt);
+                window.removeEventListener("mousemove", z.fmt);
+                z.sts = setTimeout(() => (z.hover = false), z.sp * 2);
+                if (z.txp) {
+                    z.c = Math.round(Math.abs(z.txp / (100 / z.o)));
+                    z.s.style = `transform: translate3d(${
+                        (-100 / z.o) * z.c
+                    }%, 0px, 0px);transition: all ${
+                        z.sp / 1000 / 1.5
+                    }s ease 0s`;
+                }
+                z.ssb = false;
             }
         };
 
@@ -288,12 +289,10 @@ class Slider {
         z.s.addEventListener("mousedown", startSwiping);
 
         z.p.addEventListener("touchend", stopSwiping);
-        z.p.addEventListener("mouseup", stopSwiping);
+        window.addEventListener("mouseup", stopSwiping);
 
         z.p.addEventListener("mouseleave", () => {
             z.hover = false;
         });
     }
 }
-
-
