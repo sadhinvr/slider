@@ -1,4 +1,4 @@
-## Infinite slider / carousel (7kb) 🚀
+## Infinite slider / carousel (6kb) 🚀
 Vanilla Javascript slider.
 
 [Demo](https://sadhinvr.github.io/slider/lib/index.html)
