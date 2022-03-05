@@ -1,0 +1,26 @@
+{
+  "name": "slider",
+  "version": "1.0.0",
+  "description": "infinite slider carousel",
+  "main": "lib/slider.min.js",
+  "scripts": {
+    "build": "babel src -d lib && uglifyjs lib/slider.js -o lib/slider.min.js -c -m"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "uglify-js": "^3.9.4"
+  },
+  "keywords": [
+    "infinite",
+    "slider",
+    "carousel",
+    "vanilla",
+    "javascript",
+    "swipe"
+  ],
+  "author": "sadhinvr",
+  "license": "ISC"
+}
