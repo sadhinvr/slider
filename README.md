@@ -8,4 +8,4 @@ Vanilla Javascript slider.
 - no-jquery 
 - swipe & drag
 
-⚠️ This is on devlopment mode.
+#### ⚠️ This is on devlopment mode.
