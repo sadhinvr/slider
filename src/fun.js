@@ -85,7 +85,7 @@ function slider(parent, set) {
             gutter = responsive.all.gutter;
         }
 
-        slideItems[0].style.marginLeft = `${gutter/2}`
+        slideItems[0].style.marginLeft = `${gutter/2}px`
         let tempStyle = `calc((100% / ${show}) - ${gutter}px)`,
             style = styleSheet.sheet.cssRules[0].style;
         style.maxWidth = tempStyle;
