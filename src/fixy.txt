@@ -1,0 +1,311 @@
+class Slider {
+    constructor(parent, set) {
+        this.parent = parent;
+        set?.responsive
+            ? (this.responsive = set.responsive)
+            : (this.responsive = { default: { show: set?.show || 2, slideby: set?.slideby || 1 } });
+        !this.responsive.default &&
+            (this.responsive.default = {
+                show: set?.show || 2,
+                slideby: set?.slideby || 1,
+            });
+        this.show = this.responsive.default.show;
+        this.slideby = this.responsive.default.slideby;
+        this.response();
+
+        this.speed = set?.speed || 500;
+        this.auto = set?.auto || false;
+        this.auto && this.autoPlay();
+
+        this.styleSheet = document.createElement("style");
+        document.head.appendChild(this.styleSheet);
+        this.styleSheet.sheet.insertRule(`
+        .slider-item {
+            min-width: calc((100% / ${this.show}) - 16px);
+            max-width: calc((100% / ${this.show}) - 16px);
+        }
+        `);
+        this.hanResize();
+
+        this.slide = this.parent.firstElementChild;
+        this.slideItems = this.slide.children;
+        this.total = this.slideItems.length;
+        this.cloneCount = this.getCloneCountForLoop();
+        this.slideCountNew = this.total + this.cloneCount * 2;
+        this.index = this.cloneCount;
+        this.indexMax = Math.max(0, this.slideCountNew - Math.ceil(this.show));
+        this.mainArr = [];
+        this.curIndex = 0;
+
+        this.initStructure();
+        this.slideFun(0);
+        this.events();
+
+        
+        const btn = (s=1) => {
+            clearTimeout(this.preBtnTimeOut);
+            this.hover = true;
+            this.preBtnTimeOut = setTimeout(
+                () => (this.hover = false),
+                this.speed * 2
+            );
+            this.slideFun(s);
+        }
+        set?.nxt?.addEventListener("click", () => btn());
+        set?.pre?.addEventListener("click", ()=>btn(-1));
+    }
+
+    autoPlay() {
+        setInterval(() => {
+            !this.hover && this.slideFun(this.auto?.deraction || 1);
+        }, this.auto?.delay || 2000);
+    }
+
+    getItemsMax() {
+        const arr = [];
+
+        if (this.show < this.total) {
+            arr.push(this.show);
+        }
+
+        if (!arr.length) {
+            arr.push(0);
+            console.log('you need more items. try to copy');
+        }
+
+        return Math.ceil(Math.max.apply(null, arr));
+    }
+
+    getCloneCountForLoop() {
+        let itemsMax = this.getItemsMax(),
+            result = Math.ceil((itemsMax * 5 - this.total) / 2);
+        result = Math.max(itemsMax, result);
+        return result;
+    }
+
+    initStructure() {
+        if (this.cloneCount) {
+            let fragmentBefore = document.createDocumentFragment(),
+                fragmentAfter = document.createDocumentFragment();
+
+            this.tempArr = [];
+
+            [...this.slideItems].forEach((ele, i) => {
+                ele.dataset.id = i;
+                this.tempArr.push(i);
+            });
+
+            for (let j = this.cloneCount; j--; ) {
+                let num = j % this.total,
+                    cloneFirst = this.slideItems[num].cloneNode(true),
+                    lastIndex = this.total - 1 - num,
+                    cloneLast = this.slideItems[lastIndex].cloneNode(true);
+
+                cloneFirst.classList.add("clone");
+                fragmentAfter.insertBefore(
+                    cloneFirst,
+                    fragmentAfter.firstChild
+                );
+
+                cloneLast.classList.add("clone");
+                fragmentBefore.appendChild(cloneLast);
+            }
+
+            this.slide.insertBefore(fragmentBefore, this.slide.firstChild);
+            this.slide.appendChild(fragmentAfter);
+
+            [...this.slideItems].forEach((ele) =>
+                this.mainArr.push(ele.dataset.id * 1)
+            );
+
+            this.resetPos();
+        }
+    }
+
+    resetPos() {
+        this.curIndex = this.cloneCount;
+        this.slide.style = `transform: translate3d(${
+            (-100 / this.show) * this.curIndex
+        }%, 0px, 0px);transition: all ${this.speed / 1000}s ease 0s`;
+    }
+
+    slideFun(sign = 1) {
+        // let r;
+        const temI = this.curIndex + this.slideby * sign;
+        const temI2 = temI + this.slideby * sign;
+        const temRevArr = [...this.tempArr].reverse();
+        this.playBack = (sign = 1) => {
+            console.log(this.curIndex);
+            let pospre = this.mainArr[this.curIndex] - this.slideby,
+                posnxt = this.mainArr[this.curIndex] + this.show + this.slideby;
+
+            posnxt > this.total ? (posnxt = posnxt % this.total) : null;
+            pospre < 0 ? (pospre = temRevArr[-1 * pospre - 1]) : null;
+            if (sign == -1) {
+                for (let i = 0; i < this.mainArr.length; i++) {
+                    if (i <= this.curIndex) {
+                        continue;
+                    }
+                    if (
+                        this.mainArr[i] == this.mainArr[this.curIndex] &&
+                        this.mainArr[i - this.slideby] == pospre
+                    ) {
+                        this.curIndex = i;
+                        // console.log(goto);
+                        break;
+                    }
+                }
+            } else {
+                for (let i = this.mainArr.length; i > -1; i--) {
+                    if (i >= this.curIndex) {
+                        continue;
+                    }
+                    // console.log('kdjk')
+                    if (
+                        this.mainArr[i] == this.mainArr[this.curIndex] &&
+                        this.mainArr[i + this.show + this.slideby] == posnxt
+                    ) {
+                        this.curIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            this.slide.style = `transform: translate3d(${
+                (-100 / this.show) * this.curIndex
+            }%, 0px, 0px);transition: all 0s ease 0s`;
+        };
+
+        if (sign) {
+            if (temI >= 0 && temI <= this.mainArr.length - this.show) {
+                this.curIndex = temI;
+                this.slide.style = `transform: translate3d(${
+                    (-100 / this.show) * this.curIndex
+                }%, 0px, 0px);transition: all ${this.speed / 1000}s ease 0s`;
+            }
+
+            // console.log(this.curIndex);
+            if (temI2 < 0 || temI2 > this.mainArr.length - this.show) {
+                setTimeout(() => this.playBack(sign), this.speed);
+            }
+        }
+        console.log(this.curIndex);
+    }
+
+    response() {
+        let temTimer,
+            keys = Object.keys(this.responsive)
+                .filter((k) => k * 1)
+                .map((k) => k * 1)
+                .sort((a, b) => a - b);
+
+        this.hanResize = () => {
+            const index =
+                [...keys, window.innerWidth]
+                    .sort((a, b) => a - b)
+                    .findIndex((a) => a == window.innerWidth) - 1;
+            if (index != -1) {
+                const bp = this.responsive[keys[index]];
+                this.show = bp?.show || this.show;
+                this.slideby = bp?.slideby || this.slideby;
+            } else {
+                this.show = this.responsive.default.show;
+                this.slideby = this.responsive.default.slideby;
+            }
+
+            let tempStyle = `calc((100% / ${this.show}) - 16px)`,
+                style = this.styleSheet.sheet.cssRules[0].style;
+            style.maxWidth = tempStyle;
+            style.minWidth = tempStyle;
+        };
+
+        window.addEventListener("resize", (e) => {
+            temTimer && clearTimeout(temTimer);
+            temTimer = setTimeout(() => {
+                this.hanResize();
+                this.resetPos();
+            }, 200);
+        });
+    }
+
+    events() {
+        this.parent.addEventListener("mouseover", () => {
+            this.hover = true;
+        });
+
+        const startSwiping = (e) => {
+            if (e.cancelable) e.preventDefault();
+            e.stopPropagation();
+            this.hover = true;
+            let react = this.parent.getBoundingClientRect(),
+                temX = (e.clientX || e.touches[0].clientX) - react.x,
+                temCurInd = this.curIndex,
+                calPos = (e) => {
+                    this.temXpos =
+                        (-100 / this.show) * temCurInd -
+                        ((temX -
+                            (e.clientX || e.touches[0].clientX) -
+                            react.x) /
+                            react.width) *
+                            100;
+                };
+            // console.log('touchstart');
+            this.touchMove = (e) => {
+                calPos(e);
+                this.curIndex = Math.round(
+                    Math.abs(this.temXpos / (100 / this.show))
+                );
+
+                if (
+                    this.temXpos <=
+                        (this.mainArr.length - this.show) *
+                            (-100 / this.show) ||
+                    this.temXpos >= 0
+                ) {
+                    // temCurInd=this.curIndex;
+                    // console.log(this.curIndex)
+                    temX = (e.clientX || e.touches[0].clientX) - react.x;
+                    this.playBack(this.temXpos >= 0 ? -1 : 1);
+                    temCurInd = this.curIndex;
+                    calPos(e);
+
+                    // this.temXpos = (-100 / this.show) * this.curIndex;
+                    console.log((-100 / this.show) * this.curIndex);
+                }
+
+                // console.log(this.temXpos)
+                this.slide.style = `transform: translate3d(${this.temXpos}%, 0px, 0px);transition:0s`;
+            };
+            window.addEventListener("touchmove", this.touchMove);
+            window.addEventListener("mousemove", this.touchMove);
+        };
+
+        const stopSwiping = (e) => {
+            window.removeEventListener("touchmove", this.touchMove);
+            window.removeEventListener("mousemove", this.touchMove);
+            setTimeout(() => (this.hover = false), this.speed * 2);
+            if (this.temXpos) {
+                this.curIndex = Math.round(
+                    Math.abs(this.temXpos / (100 / this.show))
+                );
+                this.slide.style = `transform: translate3d(${
+                    (-100 / this.show) * this.curIndex
+                }%, 0px, 0px);transition: all ${
+                    this.speed / 1000 / 1.5
+                }s ease 0s`;
+            }
+        };
+
+        
+
+        this.parent.addEventListener("touchstart", startSwiping);
+        this.slide.addEventListener("mousedown", startSwiping);
+
+        this.parent.addEventListener("touchend",stopSwiping);
+        this.parent.addEventListener("mouseup",stopSwiping);
+
+        this.parent.addEventListener("mouseleave", () => {
+            this.hover = false;
+        });
+    }
+}

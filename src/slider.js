@@ -3,7 +3,9 @@ class Slider {
         const z = this;
         z.p = parent; //parent
         //responsive
-        set?.res ? (z.res = set.res) : (z.res = { all: { show: 2, to: 1 } });
+        set?.res
+            ? (z.res = set.res)
+            : (z.res = { all: { o: set?.show || 2, to: set?.to || 1 } });
         !z.res.all &&
             (z.res.all = {
                 o: set?.show || 2,
@@ -118,6 +120,44 @@ class Slider {
         }%, 0px, 0px);transition: all ${this.sp / 1000}s ease 0s`;
     }
 
+    //reponsive function
+    fr() {
+        const z = this;
+        let temTimer,
+            keys = Object.keys(z.res)
+                .filter((k) => k * 1)
+                .map((k) => k * 1)
+                .sort((a, b) => a - b);
+
+        z.hanResize = () => {
+            const x =
+                [...keys, window.innerWidth]
+                    .sort((a, b) => a - b)
+                    .findIndex((a) => a == window.innerWidth) - 1;
+            if (x != -1) {
+                const bp = z.res[keys[x]];
+                z.o = bp?.show || z.o;
+                z.to = bp?.to || z.to;
+            } else {
+                z.o = z.res.all.o;
+                z.to = z.res.all.to;
+            }
+
+            let tempStyle = `calc((100% / ${z.o}) - 16px)`,
+                style = z.ss.sheet.cssRules[0].style;
+            style.maxWidth = tempStyle;
+            style.minWidth = tempStyle;
+        };
+
+        window.addEventListener("resize", (e) => {
+            temTimer && clearTimeout(temTimer);
+            temTimer = setTimeout(() => {
+                z.hanResize();
+                z.rp();
+            }, 200);
+        });
+    }
+
     //slidefunction
     fs(sign = 1) {
         // let r;
@@ -177,44 +217,6 @@ class Slider {
         console.log(z.c);
     }
 
-    //reponsive function
-    fr() {
-        const z = this;
-        let temTimer,
-            keys = Object.keys(z.res)
-                .filter((k) => k * 1)
-                .map((k) => k * 1)
-                .sort((a, b) => a - b);
-
-        z.hanResize = () => {
-            const x =
-                [...keys, window.innerWidth]
-                    .sort((a, b) => a - b)
-                    .findIndex((a) => a == window.innerWidth) - 1;
-            if (x != -1) {
-                const bp = z.res[keys[x]];
-                z.o = bp?.show || z.o;
-                z.to = bp?.to || z.to;
-            } else {
-                z.o = z.res.all.o;
-                z.to = z.res.all.to;
-            }
-
-            let tempStyle = `calc((100% / ${z.o}) - 16px)`,
-                style = z.ss.sheet.cssRules[0].style;
-            style.maxWidth = tempStyle;
-            style.minWidth = tempStyle;
-        };
-
-        window.addEventListener("resize", (e) => {
-            temTimer && clearTimeout(temTimer);
-            temTimer = setTimeout(() => {
-                z.hanResize();
-                z.rp();
-            }, 200);
-        });
-    }
-
     //set events function
     ev() {
         const z = this;
@@ -228,7 +230,7 @@ class Slider {
             e.cancelable && e.preventDefault();
             e.stopPropagation();
             z.hover = true;
-            if(e.clientX || e.touches){
+            if (e.clientX || e.touches) {
                 let react = z.p.getBoundingClientRect(),
                     temX = (e.clientX || e.touches[0].clientX) - react.x,
                     temCurInd = z.c,
@@ -242,24 +244,27 @@ class Slider {
                                 100;
                     };
                 // console.log('touchstart');
-    
+
                 //touch move function
                 z.fmt = (e) => {
                     calPos(e);
                     z.c = Math.round(Math.abs(z.txp / (100 / z.o)));
-    
-                    if (z.txp <= (z.a.length - z.o) * (-100 / z.o) || z.txp >= 0) {
+
+                    if (
+                        z.txp <= (z.a.length - z.o) * (-100 / z.o) ||
+                        z.txp >= 0
+                    ) {
                         // temCurInd=z.c;
                         // console.log(z.c)
                         temX = (e.clientX || e.touches[0].clientX) - react.x;
                         z.playBack(z.txp >= 0 ? -1 : 1);
                         temCurInd = z.c;
                         calPos(e);
-    
+
                         // z.txp = (-100 / z.o) * z.c;
                         console.log((-100 / z.o) * z.c);
                     }
-    
+
                     // console.log(z.txp)
                     z.s.style = `transform: translate3d(${z.txp}%, 0px, 0px);transition:0s`;
                 };
