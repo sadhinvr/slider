@@ -32,7 +32,8 @@ function slider(parent, set) {
         fragmentBefore = document.createDocumentFragment(),
         fragmentAfter = fragmentBefore.cloneNode(true),
         temTimer,
-        clickTimeoutId;
+        clickTimeoutId,
+        offset;
 
     document.head.appendChild(styleSheet);
     styleSheet.sheet.insertRule('.s-i{}');
@@ -85,8 +86,11 @@ function slider(parent, set) {
             gutter = responsive.all.gutter;
         }
 
-        slideItems[0].style.marginLeft = `${gutter/2}px`
-        let tempStyle = `calc((100% / ${show}) - ${gutter}px)`,
+        console.log(show)
+
+        offset = (gutter*(show-1))/show;
+        // slideItems[0].style.marginLeft = `${gutter/2}px`
+        let tempStyle = `calc((100% / ${show}) - ${offset}px)`,
             style = styleSheet.sheet.cssRules[0].style;
         style.maxWidth = tempStyle;
         style.minWidth = tempStyle;
@@ -111,7 +115,7 @@ function slider(parent, set) {
                 temCurInd = curIndex,
                 calPos = (e) => {
                     temXpos =
-                        (-100 / show) * temCurInd -
+                        ((-100 / show) * temCurInd -(100/window.innerWidth)*curIndex*(gutter/show))-
                         ((temX -
                             (e.clientX || e?.touches[0].clientX) -
                             react.x) /
@@ -156,6 +160,7 @@ function slider(parent, set) {
             if (temXpos) {
                 curIndex = Math.round(Math.abs(temXpos / (100 / show)));
                 slideStyle(speed / 1000 / 1.5);
+                temXpos=0
             }
             startedSwiping = false;
         }
@@ -189,9 +194,7 @@ function slider(parent, set) {
     //resetpos
     function resetpos() {
         curIndex = cloneCount;
-        styleSheet.style = `transform: translate3d(${
-            (-100 / show) * curIndex
-        }%, 0px, 0px);transition: all ${speed / 1000}s ease 0s`;
+        slideStyle()
     }
 
     //slide function
@@ -256,8 +259,9 @@ function slider(parent, set) {
     }
 
     function slideStyle(transition = speed / 1000) {
+        // console.log( ((-100 / show) * curIndex)-(100/window.innerWidth)*curIndex*(gutter/show))
         slide.style = `transform: translate3d(${
-            (-100 / show) * curIndex
+            ((-100 / show) * curIndex)-(100/window.innerWidth)*curIndex*(gutter/show)
         }%, 0px, 0px);${
             transition ? `transition: all ${transition}s ease 0s` : ""
         }`;

@@ -4,8 +4,8 @@
   "description": "infinite slider carousel",
   "main": "lib/slider.min.js",
   "scripts": {
-    "build": "babel src -d lib && uglifyjs lib/slider.js -o lib/slider.min.js -c -m",
-    "build_fun": "babel src -d lib/test && uglifyjs lib/test/fun.js -o lib/test/fun.min.js -c -m"
+    "build": "babel src/slider.js -d lib && uglifyjs lib/slider.js -o lib/slider.min.js -c -m",
+    "build2": "babel src/slider2.js -d lib && uglifyjs lib/slider2.js -o lib/slider2.min.js -c -m"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.1",
