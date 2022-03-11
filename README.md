@@ -86,9 +86,12 @@ mySlider.click(nextBtn) // default is +1 so you don't have to write twice
 
 Example code:
 ```js
+// here 900 is breakpoint. It means it will show 4 items, slide 4 & gutter 20px in 900 or bigger screens
+// show, to , gutter are optional. Use as you need 😊
+    
 responsive: {
-    900: {          // here 900 is breakpoint. It means it will show 4 items, slide 4 & gutter 20px in 900 or bigger screens
-        show: 4,    // show, to , gutter are optional. Use as you need 😊
+    900: {
+        show: 4,
         to: 4,
         gutter: 20
     }, 700: {
